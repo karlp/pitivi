@@ -164,7 +164,7 @@ class VideoModifierFactory(StreamModifierFactory):
 
         # if we have an output stream specified, we add a capsfilter
         vscale = gst.element_factory_make("videoscale")
-        vscale.props.add_borders = True
+        #vscale.props.add_borders = True
         b.add(vscale)
         vrate.link(vscale)
         self.debug("output_streams:%d", len(self.output_streams))

@@ -384,7 +384,7 @@ class PitiviMainWindow(gtk.Window, Loggable):
 
     def _createUi(self, instance):
         """ Create the graphical interface """
-        self.set_title("%s" % (APPNAME))
+        self.set_title("%s \u2014 %s" % (APPNAME, pitivi_version))
         self.connect("delete-event", self._deleteCb)
         self.connect("configure-event", self._configureCb)
 
@@ -1002,7 +1002,7 @@ class PitiviMainWindow(gtk.Window, Loggable):
 
         if self.project is not None:
             app_name = "%s" % (APPNAME)
-            title = u"%s \u2014 %s" % (self.project.name, app_name)
+            title = u"%s \u2014 %s \u2014 %s" % (self.project.name, app_name, pitivi_version)
             if dirty:
                 title = "*" + title
             title = title.encode("utf8")

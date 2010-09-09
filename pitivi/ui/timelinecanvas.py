@@ -238,15 +238,13 @@ class TimelineCanvas(goocanvas.Canvas, Zoomable, Loggable):
             y -= h
         return (x, y), (w, h)
 
-
     def _selectionDrag(self, item, target, event):
         if self._selecting:
             self._got_motion_notify = True
             cur = self.from_event(event)
             pos, size = self._normalize(self._mousedown, cur)
-            m = self._marquee
-            m.props.x, m.props.y = pos
-            m.props.width, m.props.height = size
+            self._marquee.props.x, self._marquee.props.y = pos
+            self._marquee.props.width, self._marquee.props.height = size
             return True
         return False
 
@@ -283,7 +281,7 @@ class TimelineCanvas(goocanvas.Canvas, Zoomable, Loggable):
             True)
         if items:
             return set((item.element for item in items if isinstance(item,
-                TrackObject)))
+                TrackObject) and item.bg in items))
         return set()
 
 ## playhead implementation

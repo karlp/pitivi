@@ -437,13 +437,14 @@ class Timeline(gtk.Table, Loggable, Zoomable):
     def _dragDropCb(self, widget, context, x, y, timestamp):
         if  context.targets not in DND_EFFECT_LIST:
             self.app.action_log.begin("add clip")
-
+            self.timeline.disableUpdates()
             self._add_temp_source(x,y)
             focus = self._temp_objects[0]
             self._move_context = MoveContext(self.timeline,
                                              focus, set(self._temp_objects[1:]))
             self._move_temp_source(self.hadj.props.value + x, y)
             self._move_context.finish()
+            self.timeline.enableUpdates()
             self.app.action_log.commit()
             context.drop_finish(True, timestamp)
             self._factories = None
@@ -459,8 +460,10 @@ class Timeline(gtk.Table, Loggable, Zoomable):
             timeline_objs = self._getTimelineObjectUnderMouse(x, y, factory.getInputStreams()[0])
             if timeline_objs:
                 self.app.action_log.begin("add effect")
+                self.timeline.disableUpdates()
                 self.timeline.addEffectFactoryOnObject(factory,
                                                timeline_objects = timeline_objs)
+                self.timeline.enableUpdates()
                 self.app.action_log.commit()
                 self._factories = None
                 self.app.current.seeker.seek(self._position)

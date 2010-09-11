@@ -304,7 +304,9 @@ class RandomAccessPreviewer(Previewer):
         the next thumbnail in the queue. This should always be called from the
         main application thread."""
         if self._queue:
-            self._startThumbnail(self._queue[0])
+            if not self._startThumbnail(self._queue[0]):
+                self._queue.pop(0)
+                self._nextThumbnail()
         return False
 
     def _requestThumbnail(self, segment):
@@ -387,8 +389,7 @@ class RandomAccessVideoPreviewer(RandomAccessPreviewer):
 
     def _startThumbnail(self, timestamp):
         RandomAccessPreviewer._startThumbnail(self, timestamp)
-        self.log("timestamp : %s", gst.TIME_ARGS(timestamp))
-        self.videopipeline.seek(1.0,
+        return self.videopipeline.seek(1.0,
             gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
             gst.SEEK_TYPE_SET, timestamp,
             gst.SEEK_TYPE_NONE, -1)
@@ -428,7 +429,10 @@ class RandomAccessAudioPreviewer(RandomAccessPreviewer):
             conv : self.audioSink,
             self.audioSink : None})
         bus = self.audioPipeline.get_bus()
-        bus.set_sync_handler(self._bus_message)
+        bus.add_signal_watch()
+        bus.connect("message::segment-done", self._busMessageSegmentDoneCb)
+        bus.connect("message::error", self._busMessageErrorCb)
+
         self._audio_cur = None
         self.audioPipeline.set_state(gst.STATE_PAUSED)
 
@@ -439,26 +443,29 @@ class RandomAccessAudioPreviewer(RandomAccessPreviewer):
         # for audio files, we need to know the duration the segment spans
         return time - (time % self.tdur), self.tdur
 
-    def _bus_message(self, bus, message):
-        if message.type == gst.MESSAGE_SEGMENT_DONE:
-            self._finishWaveform()
+    def _busMessageSegmentDoneCb(self, bus, message):
+        self.debug("segment done")
+        self._finishWaveform()
 
-        elif message.type == gst.MESSAGE_ERROR:
-            error, debug = message.parse_error()
-            # FIXME: do something intelligent here
-            print "Event bus error:", str(error), str(debug)
+    def _busMessageErrorCb(self, bus, message):
+        error, debug = message.parse_error()
+        print "Event bus error:", str(error), str(debug)
 
         return gst.BUS_PASS
 
     def _startThumbnail(self, (timestamp, duration)):
         RandomAccessPreviewer._startThumbnail(self, (timestamp, duration))
         self._audio_cur = timestamp, duration
-        self.audioPipeline.seek(1.0,
+        res = self.audioPipeline.seek(1.0,
             gst.FORMAT_TIME,
             gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE | gst.SEEK_FLAG_SEGMENT,
             gst.SEEK_TYPE_SET, timestamp,
             gst.SEEK_TYPE_SET, timestamp + duration)
+        if not res:
+            self.warning("seek failed %s", timestamp)
         self.audioPipeline.set_state(gst.STATE_PLAYING)
+
+        return res
 
     def _finishWaveform(self):
         surfaces = []

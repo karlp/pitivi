@@ -3,7 +3,7 @@ AC_PREREQ(2.52)
 dnl initialize autoconf
 dnl when going to/from release please set the nano (fourth number) right !
 dnl releases only do Wall, cvs and prerelease does Werror too
-AC_INIT(PiTiVi, 0.13.4.3,
+AC_INIT(PiTiVi, 0.13.5,
     http://www.pitivi.org/,
     pitivi)
 
@@ -34,7 +34,7 @@ dnl the runtime checks in pitivi/check.py
 AC_SUBST(PYGTK_REQ, 2.14.0)
 AC_SUBST(PYGST_REQ, 0.10.19)
 AC_SUBST(GST_REQ, 0.10.28)
-AC_SUBST(GNONLIN_REQ, 0.10.15)
+AC_SUBST(GNONLIN_REQ, 0.10.16)
 AC_SUBST(PYCAIRO_REQ, 1.0.0)
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)

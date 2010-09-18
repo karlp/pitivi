@@ -167,13 +167,8 @@ msgid ""
 "You do not have a recent enough version of the cairo Python bindings "
 "(currently %s)"
 msgstr ""
-<<<<<<< HEAD
-"You do not have a recent enough version of the cairo Python bindings (your "
-"version %s)"
-=======
 "You do not have a recent enough version of the Cairo Python bindings "
 "(your version %s)"
->>>>>>> make it explicit that we're talking about YOUR version being out of date
 
 #: ../pitivi/check.py:143
 #, python-format
